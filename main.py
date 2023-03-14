@@ -1,53 +1,6 @@
 import collections
 import itertools
 from operator import itemgetter
-from random import choice
-
-def cards(a, b: tuple) -> dict:  # функция генерации колды со значениями карт
-    cards = {}
-    amount = len(a)
-    for i in range(0, amount):
-        for j in b:
-            cards.update({(a[i] + j): (a[i], j, (i + 1))})
-    return cards
-
-
-def card_in_hands(a: dict) -> (list):  # Список карт на руках + сообщение на экран
-    cardInHands = []
-    message = ''
-    for i in range(2):
-        cardRandom = choice(list(a.keys()))  # Ключ случ карты
-        message += str(cardRandom) + " "
-        card = a[cardRandom]  # Значение случ карты
-        cardInHands.append(card)
-        a.pop(cardRandom)  # Удаляем карту из колоды
-    print("На руках у вас: " + message)
-    return cardInHands
-
-
-def card_in_table(a: dict, n: int) -> (list, dict):  # Список карт на столе и колоду без них + сообщение на экран
-    cardInTable = []
-    message = ''
-    for i in range(n):
-        cardRandom = choice(list(a.keys()))  # Ключ случ карты
-        message += str(cardRandom) + " "
-        card = a[cardRandom]  # Значение случ карты
-        cardInTable.append(card)
-        a.pop(cardRandom)  # Удаляем карту из колоды
-    print("На стол выпали карты: " + message)
-    return cardInTable, a
-
-
-def all_cards(CardOnTable: int) -> list:  # создание колоды, раздача карт)
-    a = ("2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A")
-    b = ("D", "H", "C", "S")
-    cardDeck = cards(a, b)  # создание колоды
-    cardOnTableAndCardDeck = card_in_table(cardDeck, CardOnTable)  # получаем карты на столе и оставш.колоду
-    cardInTable = cardOnTableAndCardDeck[0]  # переменая карт на столе
-    Card_decK = cardOnTableAndCardDeck[1]  # переменая оставшиеся колоды
-    cardInHands = card_in_hands(Card_decK)  # получаем карты на руках
-    allCards = cardInTable + cardInHands  # переменая всех открытых карт (номинал карты + масть + знчение)
-    return allCards
 
 
 def combinations(a: list, n: int) -> list:  # функция генерирует камбинации
@@ -280,42 +233,33 @@ def high_card(a: list):
     print('У вас Кикер: ' + str(maxCard[0]) + str(maxCard[1]))
 
 
+def generator_new_list(a: list) -> list:
+    newList = []
+    dictCards = {"2": 1, "3": 2, "4": 3, "5": 4, "6": 5, "7": 6, "8": 7, "9": 8, "10": 9, "J": 10, "Q": 11, "K": 12,
+                 "A": 13}
+    for i in a:
+        rangCard = i[:-1]
+        suitСard = i[-1]
+        valueСard = dictCards.get(rangCard)
+        cardWithValue = (rangCard, suitСard, valueСard)
+        newList.append(cardWithValue)
+    return newList
+
+
 def check_combinations(a: list):
-    if not royal_flush(a):
-        if not straight_flush(a):
-            if not four_of_a_kind(a):
-                if not full_house(a):
-                    if not flash(a):
-                        if not straight(a):
-                            if not three_of_a_kind(a):
-                                if not pair(a):
-                                    high_card(a)
+    cardsWithValues = generator_new_list(a)
+    if not royal_flush(cardsWithValues):
+        if not straight_flush(cardsWithValues):
+            if not four_of_a_kind(cardsWithValues):
+                if not full_house(cardsWithValues):
+                    if not flash(cardsWithValues):
+                        if not straight(cardsWithValues):
+                            if not three_of_a_kind(cardsWithValues):
+                                if not pair(cardsWithValues):
+                                    high_card(cardsWithValues)
 
-"""
-Для тестирования закомитить генерацию колоды и выпадения карт - allCards = all_cards(5)
-В функцию передать список имеющий вид:
-    allCards = [('2', 'D', 1), ('3', 'D', 2), ('4', 'D', 3), ('5', 'D', 4), ('6', 'D', 5), ('7', 'D', 6), ('8', 'D', 7)] 
-ОБОЗНАЧЕНИЯ ('2', 'D', 1) <- 2 -обозначение карты , D - масть карты, 1 - значение (2-1.....A-13)
 
-В Кикере передается большая карта из всех!
+# card = (input("Введите карты, через пробел:\n")).split()
+card = ['KH', '5S', 'QH', '2S', 'AH', 'JH', '10H']
 
-Масти: D - Diamonds / H- Hearts / C -Clubs / S Spades
-"""
-
-# test = [[('2', 'D', 1), ('3', 'D', 2), ('4', 'D', 3), ('5', 'D', 4), ('6', 'D', 5), ('7', 'D', 6), ('8', 'D', 7)], #Стрит Флеш 8-4 (тут 3 стрит флеша)
-#         [('2', 'H', 1), ('A', 'H', 13), ('2', 'D', 1), ('3', 'H', 2), ('4', 'K', 3), ('5', 'D', 4), ('K', 'C', 12)], #Cтрит где туз первый
-#         [('10', 'S', 9), ('10', 'C', 9), ('10', 'D', 9), ('J', 'D', 10), ('Q', 'D', 11), ('K', 'D', 12), ('A', 'D', 13)], #флеш рояль (тут еще тройка 10)
-#         [('2', 'D', 1), ('K', 'D', 12), ('4', 'D', 3), ('J', 'D', 10), ('6', 'D', 5), ('7', 'D', 6), ('2', 'S', 1)], #Флеш от 4 (есть еще один от 2)
-#         [('2', 'D', 1), ('8', 'D', 7), ('4', 'H', 3), ('2', 'C', 1), ('6', 'S', 5), ('7', 'H', 6), ('J', 'D', 10)], #Пара двоек
-#         [('10', 'S', 9), ('10', 'C', 9), ('10', 'D', 9), ('J', 'D', 10), ('J', 'H', 10), ('J', 'S', 10), ('A', 'D', 13)], #фул хаус 1010jjj (сть еще 3-10 2-j)
-#         [('J', 'D', 10), ('J', 'H', 10), ('J', 'S', 10), ('J', 'C', 10), ('6', 'D', 5), ('7', 'D', 6), ('8', 'D', 7)],   #Каре на вальтах
-#         [('J', 'D', 10), ('J', 'H', 10), ('J', 'S', 10), ('3', 'C', 2), ('7', 'D', 6), ('2', 'H', 1), ('8', 'D', 7)],   #Тролька вальтов
-#         [('J', 'D', 10), ('J', 'H', 10), ('A', 'S', 13), ('A', 'C', 13), ('2', 'D', 1), ('2', 'H', 1), ('8', 'D', 7)], #2 ары AJ (есть еще комбинация 2х пар)
-#         [('4', 'D', 3), ('3', 'H', 2), ('7', 'S', 6), ('J', 'C', 10), ('2', 'D', 1), ('Q', 'H', 12), ('8', 'D', 7)]] #rикер Q
-#
-# for i in test:
-#     check_combinations(i)
-
-allCards = all_cards(5)  # Колличество карт на столе, 2 карты на руках будут всегда
-check_combinations(allCards)
-
+check_combinations(card)
