@@ -1,1 +1,1 @@
-# poker
+Educational project
